@@ -5,8 +5,13 @@
 
 #define max_length 512
 #define PORT 1500
-Mylist WinInfo;
+
+
 void receiveNotification(void);
+
+
+Mylist WinInfo;
+Mylist WinInfo1;
 
 int s1;
 std::atomic<bool> ListAltreadySent;
@@ -99,43 +104,40 @@ void main(void)
 
 		//receiveNotification();
 
-		char* app = new char[max_length];
 		int NetInt;
 		size_t charsConverted;
 		int PathLength;
-		//HWND hwnd;
+		HWND hwnd = NULL;
+		char* PATH = new char[max_length];
+		char* app = new char[max_length];
+
 
 		while (1) {
 			try {
-				/*
+				
 				// Ricevo lunghezza path e path
 				if (recv(s1, (char *)&PathLength, sizeof(long), 0) <= 0) break;
-				if (recv(s1, app, PathLength +1, 0) <= 0) break;
+				if (recv(s1, PATH, PathLength, 0) <= 0) break;
+				PATH[PathLength] = '\0';
 
-				std::list<struct windows> actualList = WinInfo.getList();
+				std::cout << "Path ricevuto" << PATH << std::endl;
 
-				std::list<struct windows>::iterator iter1 = actualList.begin();
-				std::list<struct windows>::iterator end1 = actualList.end();
+				/*
+				::EnumWindows(enumWindowsProcA, NULL);
+				*/
+				
+				Mylist WinInfo2;
 
-				for (; iter1 != end1; iter1++) {
-					char* app1 = new char[max_length];
-
-					wcstombs_s(&charsConverted, app1, MAXLENGTH * sizeof(char), iter1->processID.c_str(), PathLength);
-
-					if (strcmp (app1, app)) {
-						hwnd = iter1->hWnd;
-						break;
-					}
-				}
-
-				SetFocus(hwnd);*/
+				struct windows newElement;
+				WinInfo.returnHWND(PATH, PathLength);
+				
+				
 				if (recv(s1, (char *)&NetInt, sizeof(long), 0) <= 0) break;
 				//std::cout << "Ricevuto : " << NetInt << std::endl;
 				if (recv(s1, app, NetInt, 0) <= 0) break;
 				app[NetInt] = '\0';
 				//std::cout << "Ricevuto : " << app << std::endl;
 				std::this_thread::sleep_for(std::chrono::seconds(3)); // per dare il tempo di cambiare quando usi un solo pc, 
-																	  // da togliere nella versione finale
 				KClass->PrepareKey(app);
 
 			}
@@ -144,7 +146,6 @@ void main(void)
 				break;
 			}
 
-			std::this_thread::sleep_for(std::chrono::seconds(5));
 		}
 
 		closesocket(s1);
@@ -154,7 +155,7 @@ void main(void)
 	}
 
 	NotificationThread.join();
-	//KeyStrokeThread.join();
+	KeyStrokeThread.join();
 }
 
 

@@ -15,6 +15,7 @@ std::mutex m1;
 VOID CALLBACK WinEventProcCallback(HWINEVENTHOOK hWinEventHook, DWORD dwEvent, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime)
 {
 	std::unique_lock<std::mutex> l(myMut);
+	
 	unsigned int flag = 0;
 	struct windows created;
 	struct windows destroyed;
@@ -239,8 +240,7 @@ VOID CALLBACK WinEventProcCallback(HWINEVENTHOOK hWinEventHook, DWORD dwEvent, H
 		
 		}
 	}
-
-
+	
 	return;
 }
 
@@ -263,11 +263,22 @@ BOOL CALLBACK enumWindowsProc(
 	WPARAM wParam = NULL;
 	int length = ::GetWindowTextLength(hWnd);
 	if (length == 0) return TRUE;
+
 	TCHAR* buffer;
 	buffer = new TCHAR[length + 1];
 	memset(buffer, 0, (length + 1) * sizeof(TCHAR));
-
+	LPTSTR luna = new TCHAR[500];
+	GetWindowText(hWnd, luna, length + 1);
 	GetWindowText(hWnd, buffer, length + 1);
+
+	if (length != GetWindowText(hWnd, buffer, length + 1)) {
+		std::cout << "name not found" << std::endl;
+		length = 20;
+		memset(buffer, 0, (length + 1) * sizeof(TCHAR));
+		wcscpy(buffer, L"Not found");
+	}
+
+
 
 	HICON icon = (HICON) SendMessage(hWnd, WM_GETICON, ICON_SMALL2, 0);
 	if (icon == NULL)
@@ -291,6 +302,7 @@ BOOL CALLBACK enumWindowsProc(
 	newElement.nome = windowTitle;
 	newElement.icon = icon;
 	newElement.hWnd = hWnd;
+
 	WinInfo.push_back(newElement);
 
 	return TRUE;
@@ -301,8 +313,14 @@ BOOL CALLBACK enumWindowsProcA(
 	__in  LPARAM lParam
 	) {
 
+
+	//std::unique_lock<std::mutex> l(m1);
+
 	if (!IsWindowVisible(hWnd) || !(GetWindowLong(hWnd, GWL_STYLE) & WS_EX_APPWINDOW))
 		return TRUE;
+
+	// L'ultimo parametro ci identifica quelle nella task bar
+
 
 	struct windows newElement;
 	WPARAM wParam = NULL;
@@ -312,8 +330,16 @@ BOOL CALLBACK enumWindowsProcA(
 	buffer = new TCHAR[length + 1];
 	memset(buffer, 0, (length + 1) * sizeof(TCHAR));
 
-	GetWindowText(hWnd, buffer, length + 1);
-	HICON icon = (HICON)SendMessage(hWnd, WM_GETICON, wParam, lParam);
+	
+	HICON icon = (HICON)SendMessage(hWnd, WM_GETICON, ICON_SMALL2, 0);
+	if (icon == NULL)
+		icon = (HICON)SendMessage(hWnd, WM_GETICON, ICON_SMALL, 0);
+	if (icon == NULL)
+		icon = (HICON)SendMessage(hWnd, WM_GETICON, ICON_BIG, 0);
+	if (icon == NULL)
+		icon = (HICON)GetClassLongPtr(hWnd, GCL_HICON);
+	if (icon == NULL)
+		icon = (HICON)GetClassLongPtr(hWnd, GCL_HICONSM);
 
 	std::tstring windowTitle = std::tstring(buffer);
 	delete[] buffer;
@@ -327,8 +353,8 @@ BOOL CALLBACK enumWindowsProcA(
 	newElement.nome = windowTitle;
 	newElement.icon = icon;
 	newElement.hWnd = hWnd;
-	WinInfo.ActiveOneSet(hWnd);
-
+	
+	WinInfo1.push_back(newElement);
 
 	return TRUE;
 }

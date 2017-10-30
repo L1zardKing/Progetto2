@@ -13,6 +13,7 @@ void MyServer::SerializeSend(Message msg, int s1) {
 	std::unique_lock<std::mutex> U(sending);
 	struct stat buf;
 	char* app = new char[MAXLENGTH];
+	char* prova = new char[MAXLENGTH];
 
 	size_t charsConverted;
 	size_t dimensione;
@@ -26,10 +27,22 @@ void MyServer::SerializeSend(Message msg, int s1) {
 
 
 	// Invio nome applicazione
-	dimensione = (msg.appName.size());
-	send(s1, (char*) &dimensione, 4, 0);
+
 	wcstombs_s(&charsConverted, app, MAXLENGTH * sizeof(char), msg.appName.c_str(), msg.appName.length());
-	send(s1, app, dimensione +1 , 0);
+
+	if (charsConverted == 0) {
+		prova = "Name containing unicode characters";
+		dimensione = strlen(prova);
+		send(s1,  (char*)&dimensione, 4,  0);
+		send(s1, prova, dimensione +1, 0);
+	}
+	else 
+		{
+			dimensione = msg.appName.size();
+			send(s1, (char*)&dimensione, 4, 0);
+			send(s1, app, dimensione + 1, 0);
+
+		}
 
 	
 	// Invio process path
@@ -50,7 +63,6 @@ void MyServer::SerializeSend(Message msg, int s1) {
 	stat(app, &buf);
 	dimensione = buf.st_size;
 	send(s1, (char*)&dimensione, 4, 0);
-	std::cout << "Dimensione file" << dimensione << std::endl;
 	
 	if (inviaFile(s1, app, dimensione) == -1) {
 		std::wcout << "PROBLEMI INVIO ICONA" << std::endl;
@@ -69,6 +81,8 @@ void MyServer::sendChangeName(int s1, HWND hwnd, std::wstring name)
 	std::unique_lock<std::mutex> U(sending);
 
 	char* app = new char[MAXLENGTH];
+	char* prova = new char[MAXLENGTH];
+
 	size_t charsConverted;
 	size_t dimensione;
 
@@ -84,10 +98,22 @@ void MyServer::sendChangeName(int s1, HWND hwnd, std::wstring name)
 
 
 	// Invio nome applicazione
-	dimensione = name.length();
-	send(s1, (char*)&dimensione, 4, 0);
 	wcstombs_s(&charsConverted, app, MAXLENGTH * sizeof(char), name.c_str(), name.length());
-	send(s1, app, dimensione + 1, 0);
+
+	if (charsConverted == 0) {
+		prova = "Name containing unicode characters";
+		dimensione = strlen(prova);
+		send(s1, (char*)&dimensione, 4, 0);
+		send(s1, prova, dimensione + 1, 0);
+	}
+	else
+	{
+		dimensione = name.size();
+		send(s1, (char*)&dimensione, 4, 0);
+		send(s1, app, dimensione + 1, 0);
+
+	}
+
 	
 
 }
@@ -198,7 +224,6 @@ int inviaFile(int s1, std::string path, int byteRimanenti) {
 	}
 
 	fclose(fp);
-	std::cout << "Byte inviati " << inviati << std::endl;
 	return 0;
 }
 

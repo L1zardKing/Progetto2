@@ -12,6 +12,8 @@
 #include "ExternVariables.h"
 #include "MyServerClass.h"
 
+#define MAX 1024
+
 class Mylist {
 private:
 	std::list<struct windows> Wininfo;
@@ -23,6 +25,7 @@ public:
 	~Mylist() {	}
 
 	std::list<struct windows> getList() {
+		std::unique_lock<std::mutex> l(m);
 		return Wininfo;
 	}
 
@@ -30,6 +33,51 @@ public:
 		std::unique_lock<std::mutex> l(m);
 		Wininfo = m1;
 	}
+
+
+
+	HWND returnHWND(std::string PROC, int PathLength) {
+
+		std::unique_lock<std::mutex> l(m);
+		size_t charsConverted;
+		char* app1 = new char[MAX];
+
+		std::list<struct windows>::iterator iter1 = Wininfo.begin();
+		std::list<struct windows>::iterator end1 = Wininfo.end();
+
+		for (; iter1 != end1; iter1++) {
+			SystemParametersInfo(SPI_SETFOREGROUNDLOCKTIMEOUT, 0, 0, SPIF_UPDATEINIFILE);
+
+			wcstombs_s(&charsConverted, app1, MAXLENGTH * sizeof(char), iter1->processID.c_str(), PathLength);
+			std::string stringa = app1;
+
+			if (!stringa.compare(PROC)) {
+
+				std::cout << stringa << " ---- " << PROC << std::endl;
+				HWND hApp = iter1->hWnd;
+
+				std::cout << hApp << std::endl;
+
+				DWORD dwThreadID = GetWindowThreadProcessId(hApp, NULL);
+				AttachThreadInput(
+					GetWindowThreadProcessId(GetForegroundWindow(), NULL),
+					GetCurrentThreadId(), TRUE
+					);
+
+				SetWindowPos(hApp, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+				SetWindowPos(hApp, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
+
+				SetForegroundWindow(hApp);
+				SetActiveWindow(hApp);
+				SetFocus(hApp);
+
+				AttachThreadInput(dwThreadID, GetCurrentThreadId(), false);
+
+			}
+		}
+		return NULL;
+	}
+
 
 	Mylist () { }
 

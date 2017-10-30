@@ -14,5 +14,6 @@
 
 extern int s1;
 extern Mylist WinInfo;
+extern Mylist WinInfo1;
 extern std::atomic<bool> ListAltreadySent;
 extern std::shared_ptr<MyServer> server;
