@@ -2,10 +2,11 @@
 
 #include "MainHeader.h"
 #include <boost/asio.hpp>
+#include <shellapi.h>
+
 
 #define max_length 512
 #define PORT 1500
-
 
 void receiveNotification(void);
 
@@ -28,7 +29,6 @@ void main(void)
 	server = std::make_shared<MyServer>();
 	ListAltreadySent.store(false);
 	::EnumWindows(enumWindowsProc, NULL);
-
 
 
 	HWND activeWindow = GetForegroundWindow();
@@ -126,10 +126,6 @@ void main(void)
 				::EnumWindows(enumWindowsProcA, NULL);
 				*/
 				
-				Mylist WinInfo2;
-
-				struct windows newElement;
-				WinInfo.returnHWND(PATH, PathLength);
 				
 				
 				if (recv(s1, (char *)&NetInt, sizeof(long), 0) <= 0) break;
@@ -138,6 +134,7 @@ void main(void)
 				app[NetInt] = '\0';
 				//std::cout << "Ricevuto : " << app << std::endl;
 				std::this_thread::sleep_for(std::chrono::seconds(3)); // per dare il tempo di cambiare quando usi un solo pc, 
+				WinInfo.returnHWND(PATH, PathLength);
 				KClass->PrepareKey(app);
 
 			}

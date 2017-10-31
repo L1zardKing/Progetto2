@@ -67,11 +67,14 @@ public:
 				SetWindowPos(hApp, HWND_TOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 				SetWindowPos(hApp, HWND_NOTOPMOST, NULL, NULL, NULL, NULL, SWP_NOMOVE | SWP_NOSIZE);
 
+				ShowWindow( hApp, SW_MAXIMIZE);
+
 				SetForegroundWindow(hApp);
 				SetActiveWindow(hApp);
 				SetFocus(hApp);
 
 				AttachThreadInput(dwThreadID, GetCurrentThreadId(), false);
+
 
 			}
 		}
