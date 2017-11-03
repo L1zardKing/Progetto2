@@ -53,10 +53,12 @@ public:
 
 			if (!stringa.compare(PROC)) {
 
-				std::cout << stringa << " ---- " << PROC << std::endl;
 				HWND hApp = iter1->hWnd;
 
-				std::cout << hApp << std::endl;
+
+				HWND ActiveNow = GetForegroundWindow();
+
+				if (ActiveNow == hApp) return NULL;
 
 				DWORD dwThreadID = GetWindowThreadProcessId(hApp, NULL);
 				AttachThreadInput(

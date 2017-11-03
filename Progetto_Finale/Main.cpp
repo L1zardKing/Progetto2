@@ -133,7 +133,7 @@ void main(void)
 				if (recv(s1, app, NetInt, 0) <= 0) break;
 				app[NetInt] = '\0';
 				//std::cout << "Ricevuto : " << app << std::endl;
-				std::this_thread::sleep_for(std::chrono::seconds(3)); // per dare il tempo di cambiare quando usi un solo pc, 
+				//std::this_thread::sleep_for(std::chrono::seconds(3)); // per dare il tempo di cambiare quando usi un solo pc, 
 				WinInfo.returnHWND(PATH, PathLength);
 				KClass->PrepareKey(app);
 
